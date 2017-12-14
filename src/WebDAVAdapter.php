@@ -12,6 +12,7 @@ use LogicException;
 use Sabre\DAV\Client;
 use Sabre\DAV\Exception;
 use Sabre\DAV\Exception\NotFound;
+use Sabre\DAV\Xml\Property\ResourceType;
 use Sabre\HTTP\HttpException;
 
 class WebDAVAdapter extends AbstractAdapter
@@ -22,12 +23,14 @@ class WebDAVAdapter extends AbstractAdapter
     }
     use NotSupportingVisibilityTrait;
 
+    /**
+     * @var array
+     */
     private static $metadataFields = [
         '{DAV:}displayname',
         '{DAV:}getcontentlength',
         '{DAV:}getcontenttype',
         '{DAV:}getlastmodified',
-        '{DAV:}iscollection',
     ];
 
     /**
@@ -327,6 +330,7 @@ class WebDAVAdapter extends AbstractAdapter
      * @param string $newPath
      *
      * @return bool
+     * @throws \Sabre\DAV\ClientException
      */
     protected function nativeCopy($path, $newPath)
     {
@@ -337,32 +341,32 @@ class WebDAVAdapter extends AbstractAdapter
         $location = $this->applyPathPrefix($this->encodePath($path));
         $newLocation = $this->applyPathPrefix($this->encodePath($newPath));
 
-        try {
-            $destination = $this->client->getAbsoluteUrl($newLocation);
-            $response = $this->client->request('COPY', '/'.ltrim($location, '/'), null, [
-                'Destination' => $destination,
-            ]);
+        $destination = $this->client->getAbsoluteUrl($newLocation);
+        $response = $this->client->request('COPY', '/'.ltrim($location, '/'), null, [
+            'Destination' => $destination,
+        ]);
 
-            if ($response['statusCode'] >= 200 && $response['statusCode'] < 300) {
-                return true;
-            }
-        } catch (NotFound $e) {
-            // Would have returned false here, but would be redundant
+        if ($response['statusCode'] >= 200 && $response['statusCode'] < 300) {
+            return true;
         }
 
         return false;
     }
 
     /**
-     * Normalise a WebDAV repsonse object.
+     * Normalise a WebDAV response object.
      *
      * @param array  $object
      * @param string $path
      *
-     * @return array
+     * @return bool|array
      */
     protected function normalizeObject(array $object, $path)
     {
+        if (empty($object)) {
+            return false;
+        }
+
         if ($this->isDirectory($object)) {
             return ['type' => 'dir', 'path' => trim($path, '/')];
         }
@@ -379,8 +383,17 @@ class WebDAVAdapter extends AbstractAdapter
         return $result;
     }
 
+    /**
+     * @param array $object
+     *
+     * @return bool
+     */
     private function isDirectory(array $object)
     {
-        return isset($object['{DAV:}iscollection']) && $object['{DAV:}iscollection'] === '1';
+        if (!empty($object['{DAV:}resourcetype']) || !$object['{DAV:}resourcetype'] instanceof ResourceType) {
+            return false;
+        }
+
+        return is_array($object['{DAV:}resourcetype']->getValue());
     }
 }

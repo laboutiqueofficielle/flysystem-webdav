@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.0.7 - 2017-12-14
+
+### Fixed
+
+* isDirectory and normalizeObject method
+
 ### 1.0.5 - 2016-12-14
 
 ### Fixed
