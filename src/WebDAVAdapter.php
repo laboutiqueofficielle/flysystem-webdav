@@ -390,7 +390,7 @@ class WebDAVAdapter extends AbstractAdapter
      */
     private function isDirectory(array $object)
     {
-        if (!empty($object['{DAV:}resourcetype']) || !$object['{DAV:}resourcetype'] instanceof ResourceType) {
+        if (empty($object['{DAV:}resourcetype']) || !$object['{DAV:}resourcetype'] instanceof ResourceType) {
             return false;
         }
 

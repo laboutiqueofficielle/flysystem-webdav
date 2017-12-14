@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.0.8 - 2017-12-14
+
+### Fixed
+
+* isDirectory method
+
 ### 1.0.7 - 2017-12-14
 
 ### Fixed
