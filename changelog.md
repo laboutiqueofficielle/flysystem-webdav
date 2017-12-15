@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.0.9 - 2017-12-15
+
+### Fixed
+
+* delete and deleteDir method
+
 ### 1.0.8 - 2017-12-14
 
 ### Fixed

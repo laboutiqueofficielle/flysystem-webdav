@@ -75,13 +75,13 @@ class WebDAVAdapter extends AbstractAdapter
      * @return string
      */
     protected function encodePath($path)
-	{
-		$a = explode('/', $path);
-		for ($i=0; $i<count($a); $i++) {
-			$a[$i] = rawurlencode($a[$i]);
-		}
-		return implode('/', $a);
-	}
+    {
+        $a = explode('/', $path);
+        for ($i=0; $i<count($a); $i++) {
+            $a[$i] = rawurlencode($a[$i]);
+        }
+        return implode('/', $a);
+    }
 
     /**
      * {@inheritdoc}
@@ -211,9 +211,13 @@ class WebDAVAdapter extends AbstractAdapter
         $location = $this->applyPathPrefix($this->encodePath($path));
 
         try {
-            $this->client->request('DELETE', $location);
+            $response = $this->client->request('DELETE', $location);
 
-            return true;
+            if ($response['statusCode'] >= 200 && $response['statusCode'] < 300) {
+                return true;
+            }
+
+            return false;
         } catch (NotFound $e) {
             return false;
         }
@@ -256,7 +260,7 @@ class WebDAVAdapter extends AbstractAdapter
      */
     public function deleteDir($dirname)
     {
-        return $this->delete($dirname);
+        return $this->delete(substr($dirname, -1) !== '/' ? sprintf('%s/', $dirname) : $dirname);
     }
 
     /**
