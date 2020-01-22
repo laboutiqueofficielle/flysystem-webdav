@@ -1,5 +1,10 @@
 # Changelog
 
+### 99.99.99 - 2020-01-22
+### Fixed
+
+* Update version to avoid conflict with original library
+
 ### 1.0.9 - 2017-12-15
 
 ### Fixed
